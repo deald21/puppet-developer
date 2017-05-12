@@ -1,0 +1,31 @@
+##{echo "*.netitech.loc" | sudo tee /etc/puppetlabs/puppet/autosign.conf}}
+##{}}#{}}sudo rm -r /etc/puppetlabs/puppet/ssl
+##{}}sudo /opt/puppetlabs/puppet/bin/puppet cert list -a
+
+
+config.vm.define "agent2" do |agent2|
+  #Puppet agent Debian
+  agent2.vm.box = "ARTACK/debian-jessie"
+  agent2.vm.hostname = "agent2.netitech.loc"
+  agent2.vm.network :private_network, ip: "10.0.0.12"
+  agent2.hostmanager.aliases = %w(agent2)
+  agent2.vm.provision "shell", inline: <<-SHELL
+   wget https://apt.puppetlabs.com/puppetlabs-release-pc1-jessie.deb
+   sudo dpkg -i puppetlabs-release-pc1-jessie.deb
+   sudo apt-get update
+   sudo apt-get install puppet-agent -y
+   sudo /opt/puppetlabs/bin/puppet agent --enable
+   sudo service puppet start
+
+
+   SHELL
+  end
+
+  config.vm.define "agent3" do |agent3|
+  # Puppet agent on windows 2012
+  agent3.vm.box = "devopsguys/Windows2012R2Eval"
+  agent3.vm.hostname = "agent3"
+  agent3.vm.network :private_network, ip: "10.0.0.13"
+  agent3.hostmanager.aliases = %w(agent3)
+  agent3.vm.provision "shell", :path => "windows.ps1"
+  end
